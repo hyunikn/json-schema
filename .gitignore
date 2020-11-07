@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+
+*.swp
+
+java/use-case/src/main/java/com/mycompany/app/c/TestBase.java
+java/use-case/src/main/java/com/mycompany/app/i/Test.java
+java/use-case/target/
+java/use-case/test.sample.json

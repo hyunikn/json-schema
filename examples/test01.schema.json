@@ -1,0 +1,23 @@
+{
+    "f": {
+        "%desc": "floating number",
+        "%type": "float",
+        "%default": 1.1,
+        "%sample": 0.1,
+        "%settable": true
+    },
+    "b": {
+        "%desc": "boolean",
+        "%type": "bool",
+        "%default": true,
+        "%sample": false,
+        "%settable": true
+    },
+    "s": {
+        "%desc": "string",
+        "%type": "string",
+        "%default": "x",
+        "%sample": "y",
+        "%settable": true
+    }
+}

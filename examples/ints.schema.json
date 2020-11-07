@@ -1,0 +1,30 @@
+{
+    "i8": {
+        "%desc": "8-bit integer",
+        "%type": "int8",
+        "%default": 127,
+        "%sample": -128,
+        "%settable": true
+    },
+    "i16": {
+        "%desc": "16-bit integer",
+        "%type": "int16",
+        "%default": 32767,
+        "%sample": -32768,
+        "%settable": true
+    },
+    "i32": {
+        "%desc": "32-bit integer",
+        "%type": "int32",
+        "%default": 2147483647,
+        "%sample": -2147483648,
+        "%settable": true
+    },
+    "i64": {
+        "%desc": "64-bit integer",
+        "%type": "int64",
+        "%default": 9223372036854775807,
+        "%sample": -9223372036854775808,
+        "%settable": true
+    }
+}

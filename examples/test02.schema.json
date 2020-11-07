@@ -1,0 +1,66 @@
+{
+    "%enum deck": [
+        "HEART",
+        "CLUB",
+        "DIAMOND",
+        "SPADE"
+    ],
+    "%struct myStruct": {
+        "I8": {
+            "%desc": "8-bit integer",
+            "%type": "int8",
+            "%default": 127,
+            "%sample": -128,
+            "%settable": true
+        },
+        "U8": {
+            "%desc": "8-bit unsigned integer",
+            "%type": "uint8",
+            "%default": 255,
+            "%sample": 0,
+            "%settable": true
+        },
+        "F": {
+            "%desc": "floating number",
+            "%type": "float",
+            "%default": 1.1,
+            "%sample": 0.1,
+            "%settable": true
+        },
+        "B": {
+            "%desc": "boolean",
+            "%type": "bool",
+            "%default": true,
+            "%sample": false,
+            "%settable": true
+        },
+        "S": {
+            "%desc": "string",
+            "%type": "string",
+            "%default": "x",
+            "%sample": "y",
+            "%settable": true
+        }
+    },
+
+    "e": {
+        "%desc": "card deck",
+        "%type": "deck",
+        "%default": "SPADE",
+        "%sample": "HEART",
+        "%settable": true
+    },
+    "x": {
+        "%desc": "my struct",
+        "%type": "myStruct",
+        "%default": {
+            "I8": -7,
+            "U8": 7,
+            "F": 7.7,
+            "B": true,
+            "S": "hello"
+        },
+        "%sample": null,
+        "%settable": true
+    }
+}

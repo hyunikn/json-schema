@@ -1,0 +1,30 @@
+{
+    "u8": {
+        "%desc": "8-bit unsigned integer",
+        "%type": "uint8",
+        "%default": 255,
+        "%sample": 0,
+        "%settable": true
+    },
+    "u16": {
+        "%desc": "16-bit unsigned integer",
+        "%type": "uint16",
+        "%default": 65535,
+        "%sample": 0,
+        "%settable": true
+    },
+    "u32": {
+        "%desc": "32-bit unsigned integer",
+        "%type": "uint32",
+        "%default": 4294967295,
+        "%sample": 0,
+        "%settable": true
+    },
+    "u64": {
+        "%desc": "64-bit unsigned integer",
+        "%type": "uint64",
+        "%default": 18446744073709551615,
+        "%sample": 0,
+        "%settable": true
+    }
+}
