@@ -18,12 +18,6 @@ _builtInTypeToJavaTypeMap = {
     'uint16': 'int',
     'uint32': 'long',
     'uint64': 'UINT64',
-
-    'IP': 'IPv4Address',
-    'MAC': 'MacAddress',
-    'CIDR': 'IPv4AddressWithMask',
-    'IP_Range': 'IpRange',
-    'IP_Port': 'IpPort',
 }
 assert set(_builtInTypeToJavaTypeMap.keys()) == builtInTypes.types, 'every built-in type must have its Java-type'
 
@@ -110,9 +104,9 @@ def _getEnumDefStrList(enumDef, forInterface):
 # ------Write Implementation-----------------------------------------------------
 
 _tmplParseEnum = '''\
-(%VAL% instanceof String) ? %TY%.valueOf((String) %VAL%) : (%TY%) JsonSchema.throwAsExpr("enum value must be a string")\
+(%VAL%.isStr() ? %TY%.valueOf(%VAL%.asStr().getString()) : (%TY%) JsonSchema.throwAsExpr("enum value must be a string"))\
 '''
-_tmplParseStruct = '''JSONObject.NULL.equals(%VAL%) ? null : new %TY%((JSONObject) %VAL%)'''
+_tmplParseStruct = '''(%VAL%.isNull() ? null : new %TY%((JsonObj) %VAL%))'''
 
 def _getParseValTmpl(valType, enumDef, structDef):
     if isinstance(valType, list):
@@ -145,7 +139,7 @@ if (json.has("%FIELD-NAME%")) {
     fld = json.get("%FIELD-NAME%");
     %FIELD-NAME%__uses_default = false;
 } else {
-    fld = structDesc.getJSONObject("%FIELD-NAME%").get(NVDK_DEFAULT);
+    fld = structDesc.get("%FIELD-NAME%").asObj().get(NVDK_DEFAULT);
     %FIELD-NAME%__uses_default = true;
 }
 %SET-FIELD-VAL%\
@@ -155,7 +149,7 @@ _tmplParseFieldDefaultedInner = '''
 if (json.has("%FIELD-NAME%")) {
     fld = json.get("%FIELD-NAME%");
 } else {
-    fld = structDesc.getJSONObject("%FIELD-NAME%").get(NVDK_DEFAULT);
+    fld = structDesc.get("%FIELD-NAME%").asObj().get(NVDK_DEFAULT);
 }
 %SET-FIELD-VAL%\
 '''
@@ -268,7 +262,7 @@ def _getPPrintNextStmts(fld, ty, enumDef, structDef):
 
 _tmplPrintComment = '''\
     if ((contentMask & JsonSchema.TOP_LEVEL_COMMENT) != 0) {
-        String fldComment = fldComments.getString("%FIELD-NAME%");
+        String fldComment = fldComments.get("%FIELD-NAME%").asStr().getString();
         assert fldComment != null;
         JsonSchema.bprint(sbuf, "\\n");
         JsonSchema.bprint(sbuf, fldComment.replaceAll("\\\\n", "\\n"));
@@ -767,7 +761,7 @@ def _getSetMethodDef(struct, structDesc, enumDef, structDef, isTopLevel):
 # -------------------------------------------------------------------------------------------
 
 _tmplParseArrFld = '''
-private static %ELEM-JAVA-TYPE%[] parseArr_%ELEM-TYPE%(Object fld) {
+private static %ELEM-JAVA-TYPE%[] parseArr_%ELEM-TYPE%(Json fld) {
     if (JsonObj.NULL.equals(fld)) {
         return null;
     } else if (fld instanceof JSONArray) {
@@ -775,7 +769,7 @@ private static %ELEM-JAVA-TYPE%[] parseArr_%ELEM-TYPE%(Object fld) {
         int arrLen = jsonArr.length();
         %ELEM-JAVA-TYPE%[] arr = new %ELEM-JAVA-TYPE%[arrLen];
         for (int k = 0; k < arrLen; k++) {
-            Object fldElem = jsonArr.get(k);
+            Json fldElem = jsonArr.get(k);
             arr[k] = %PARSE-FIELD-VAL%;
         }
         return arr;
@@ -1113,10 +1107,10 @@ _tmplInnerClassDef = '''
     // ==========================
 
     private static final JsonObj structDesc =
-        schemaJSON.getJSONObject("%struct-def").getJSONObject("%STRUCT-NAME%");
+        schemaJSON.get("%struct-def").asObj().get("%STRUCT-NAME%").asObj();
 
     private %CLASS-TYPE%(JsonObj json) {
-        Object fld;
+        Json fld;
 
         if (structDesc == null) {
             throw new Error("cannot parse the struct descriptor string of %STRUCT-NAME%");
@@ -1195,7 +1189,14 @@ def _getInnerClassDef(struct, enumDef, structDef, outerIntfType, genIntf):
 _tmplOptForOutermost = '''
     // CAUTION: the following two lines must go first in this class definition
     private static final String schemaJsonStr = "%SCHEMA-JSON-STR%";
-    private static final JsonObj schemaJSON = JsonObj.parse(schemaJsonStr);
+    private static final JsonObj schemaJSON;
+    static {
+        try {
+            schemaJSON = JsonObj.parse(schemaJsonStr);
+        } catch (ParseError e) {
+            throw new Error("unreachable", e);
+        }
+    }
 
     public String getSchema() {
         return schemaJsonStr;
@@ -1225,7 +1226,7 @@ _tmplOptForOutermost = '''
         Json jsonVal;
         try {
             jsonVal = Json.parse(newValJsonStr);
-        } catch (JSONException e) {
+        } catch (ParseError e) {
             errMsg.append("given new value string does not conform to the JSON format: " + e.getMessage());
             return JsonSchema.SetErr.ERR_JSON_PARSE;
         }
@@ -1254,7 +1255,7 @@ _tmplOptForOutermost = '''
         Json jsonVal;
         try {
             jsonVal = Json.parse(newValJsonStr);
-        } catch (JSONException e) {
+        } catch (ParseError e) {
             errMsg.append("given new value string does not conform to the JSON format: " + e.getMessage());
             return JsonSchema.SetErr.ERR_JSON_PARSE;
         }
@@ -1325,8 +1326,14 @@ _tmplOptForOutermost = '''
 
 _tmplFldComments = '''
 private static final String fldCommentsStr = "%CONF-FLD-COMMENTS-STR%";
-private static final JsonObj fldComments = new JsonObj(fldCommentsStr);
-
+private static final JsonObj fldComments;
+static {
+    try {
+        fldComments = JsonObj.parse(schemaJsonStr);
+    } catch (ParseError e) {
+        throw new Error("unreachable", e);
+    }
+}
 '''
 
 _tmplOptPrivForOutermost = '''\
@@ -1392,7 +1399,7 @@ _tmplTopClassDef = '''
 %NVDK-DEFAULT-DEF%\
 %OPT-PRIV-FOR-OUTERMOST%\
     private static final JsonObj structDesc =
-        schemaJSON.getJSONObject("%struct-def").getJSONObject("%STRUCT-NAME%");
+        schemaJSON.get("%struct-def").asObj().get("%STRUCT-NAME%").asObj();
 
     private %CLASS-TYPE%(JsonObj json) {
         Json fld;

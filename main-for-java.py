@@ -98,10 +98,9 @@ def main():
 
     # create a java file defining the implementation class
     imports = [
-        "io.github.hyunikn.jsonschema.JsonSchema",
-        "io.github.hyunikn.jsonschema.ConfigAccess",
-        "io.github.hyunikn.jsonschema.UINT64",
-        "com.github.hyunikn.jsonden.*",
+        "io.github.hyunikn.jsonschema.*",
+        "io.github.hyunikn.jsonden.*",
+        "io.github.hyunikn.jsonden.exception.*",
         'io.github.getify.minify.Minify',
         'java.io.File',
         'java.io.FileOutputStream',

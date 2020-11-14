@@ -1,6 +1,6 @@
 package io.github.hyunikn.jsonschema;
 
-import com.github.hyunikn.jsonden.*;
+import io.github.hyunikn.jsonden.*;
 
 import io.github.getify.minify.Minify;
 
@@ -69,8 +69,8 @@ public class JsonSchema {
     public static String parseJSONstring(Json jsonVal) {
         if (jsonVal.isNull()) {
             return null;
-        } else if (jsonVal instanceof String) {
-            return (String) jsonVal;
+        } else if (jsonVal.isStr()) {
+            return jsonVal.asStr().getString();
         } else {
             throw new Error("value is not of the declared type string, but of " + jsonVal.getClass());
         }
@@ -79,8 +79,8 @@ public class JsonSchema {
     public static boolean parseJSONbool(Json jsonVal) {
         if (jsonVal.isNull()) {
             throw new Error("value is not of the declared type bool, but is null");
-        } else if (jsonVal instanceof Boolean) {
-            return ((Boolean) jsonVal).booleanValue();
+        } else if (jsonVal.isBool()) {
+            return jsonVal.asBool().getBoolean();
         } else {
             throw new Error("value is not of the declared type bool, but of " + jsonVal.getClass());
         }
@@ -89,10 +89,8 @@ public class JsonSchema {
     public static double parseJSONfloat(Json jsonVal) {
         if (jsonVal.isNull()) {
             throw new Error("value is not of the declared type float, but is null");
-        } else if (jsonVal instanceof Float) {
-            return ((Float) jsonVal).floatValue();
-        } else if (jsonVal instanceof Double) {
-            return ((Double) jsonVal).doubleValue();
+        } else if (jsonVal.isNum()) {
+            return jsonVal.asNum().getDouble();
         } else {
             throw new Error("value is not of the declared type float, but of " + jsonVal.getClass());
         }
