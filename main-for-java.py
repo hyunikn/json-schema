@@ -85,7 +85,7 @@ def main():
         intfName = misc.getIntfName(schemaName)
         print("creating the interface file " + intfDir + '/' + intfName + '.java')
         intfFile = misc.createJavaFile(intfName, intfPkg, intfDir, [
-                "io.github.hyunikn.jsonschema.UINT64"
+                "io.github.hyunikn.jsonschemalib.UINT64"
         ])
         try:
             loaderGenerator.writeIntf(intfFile, enumDef, structDef, schemaName)
@@ -98,7 +98,7 @@ def main():
 
     # create a java file defining the implementation class
     imports = [
-        "io.github.hyunikn.jsonschema.*",
+        "io.github.hyunikn.jsonschemalib.*",
         "io.github.hyunikn.jsonden.*",
         "io.github.hyunikn.jsonden.exception.*",
         'io.github.getify.minify.Minify',

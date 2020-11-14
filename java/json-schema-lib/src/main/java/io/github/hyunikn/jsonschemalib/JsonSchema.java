@@ -1,4 +1,4 @@
-package io.github.hyunikn.jsonschema;
+package io.github.hyunikn.jsonschemalib;
 
 import io.github.hyunikn.jsonden.*;
 
