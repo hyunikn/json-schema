@@ -14,7 +14,7 @@ def _checkArgs(schemaName, sampleDir, pkgRootDir, clasPkg, intfPkg, schemaFiles)
     print('   sample dir: ' + sampleDir)
     print(' pkg root dir: ' + pkgRootDir)
     print('    class pkg: ' + clasPkg)
-    print('interface pkg: ' + intfPkg)
+    print('interface pkg: ' + (intfPkg if intfPkg else '<none>'))
     print(' schema files: ' + str(schemaFiles))
     print('')
 
