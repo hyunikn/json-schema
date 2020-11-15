@@ -198,8 +198,8 @@ def _getFieldRelatedCode(structDesc, enumDef, structDef, genIntf, isTopLevel):
 
 # -------------------------------------------------------------------------------------------------
 
-_tmplPPrintArrCall = '''pprintArr_%TY%(%VAL%, %INDENT%, sbuf, mode, contentMask, %KEY-TAIL%, errMsg);'''
-_tmplPPrintStructCall = '''%TY%.pprintNullable(%VAL%, %INDENT%, sbuf, mode, contentMask, %KEY-TAIL%, errMsg);'''
+_tmplPPrintArrCall = '''pprintArr_%TY%(%VAL%, %INDENT%, sbuf, mode, selectionBits, %KEY-TAIL%, errMsg);'''
+_tmplPPrintStructCall = '''%TY%.pprintNullable(%VAL%, %INDENT%, sbuf, mode, selectionBits, %KEY-TAIL%, errMsg);'''
 _tmplPPrintNotQuotableBuiltInTypeCall = '''JsonSchema.pprint_%TY%(%VAL%, sbuf);'''
 _tmplPPrintQuotableBuiltInTypeCall = '''if (mode == JsonSchema.PrintMode.JSON) { JsonSchema.bprint(sbuf, "\\""); JsonSchema.pprint_%TY%(%VAL%, sbuf); JsonSchema.bprint(sbuf, "\\""); } else { JsonSchema.pprint_%TY%(%VAL%, sbuf); }'''
 _tmplPPrintEnumTypeCall = '''\
@@ -261,7 +261,7 @@ def _getPPrintNextStmts(fld, ty, enumDef, structDef):
 # ----------------------------------------------------------------------------------------------------
 
 _tmplPrintComment = '''\
-    if ((contentMask & JsonSchema.TOP_LEVEL_COMMENT) != 0) {
+    if ((selectionBits & JsonSchema.TOP_LEVEL_COMMENT) != 0) {
         String fldComment = fldComments.get("%FIELD-NAME%").asStr().getString();
         assert fldComment != null;
         JsonSchema.bprint(sbuf, "\\n");
@@ -276,7 +276,7 @@ _strNewLine = '''\
 
 _tmplPlainFldPPrintStmts = '''
 // %FIELD-NAME%
-//if ((contentMask) != 0) {     TODO: implement filtering
+//if ((selectionBits) != 0) {     TODO: implement filtering
 %OPT-NEW-LINE%\
 %OPT-PRINT-COMMENT%\
     JsonSchema.printIndent(indent + 1, sbuf);
@@ -291,11 +291,11 @@ _tmplPlainFldPPrintStmts = '''
 
 _tmplDefaultedTopLevelFldPPrintStmts = '''
 // %FIELD-NAME%
-//if ((contentMask) != 0) {     TODO: implement filtering
+//if ((selectionBits) != 0) {     TODO: implement filtering
 %OPT-NEW-LINE%\
 %OPT-PRINT-COMMENT%\
     JsonSchema.printIndent(indent + 1, sbuf);
-    if ((contentMask & JsonSchema.DEFAULT_COMMENT) != 0 && %FIELD-NAME%__uses_default) {
+    if ((selectionBits & JsonSchema.DEFAULT_COMMENT) != 0 && %FIELD-NAME%__uses_default) {
         JsonSchema.bprint(sbuf, "//");
     }
     if (mode == JsonSchema.PrintMode.JSON) {
@@ -303,7 +303,7 @@ _tmplDefaultedTopLevelFldPPrintStmts = '''
     } else {
         JsonSchema.bprint(sbuf, "%FIELD-NAME%: ");
     }
-    if ((contentMask & JsonSchema.DEFAULT_COMMENT) != 0 && %FIELD-NAME%__uses_default) {
+    if ((selectionBits & JsonSchema.DEFAULT_COMMENT) != 0 && %FIELD-NAME%__uses_default) {
         JsonSchema.bprint(sbuf, "%default");
     } else {
         %PPRINT-CALL%
@@ -798,7 +798,7 @@ if (keyTail == null) {
 
 _tmplPPrintArr = '''
 private static void pprintArr_%ELEM-TYPE%(%ELEM-JAVA-TYPE%[] arr, int indent, StringBuffer sbuf,
-        JsonSchema.PrintMode mode, int contentMask, String key, StringBuffer errMsg) {
+        JsonSchema.PrintMode mode, long selectionBits, String key, StringBuffer errMsg) {
     if (key == null) {
         if (arr == null) {
             JsonSchema.bprint(sbuf, "null");
@@ -1017,7 +1017,7 @@ def _getArrSetDef(elemType, enumDef, structDef):
 # --------------------------------------------------------------------------------------------------
 
 _strEmptyStructPPrintBody = '''
-private void pprint(int indent, StringBuffer sbuf, JsonSchema.PrintMode mode, int contentMask,
+private void pprint(int indent, StringBuffer sbuf, JsonSchema.PrintMode mode, long selectionBits,
         String key, StringBuffer errMsg) {
     if (key == null) {
         JsonSchema.bprint(sbuf, "{ }");
@@ -1028,7 +1028,7 @@ private void pprint(int indent, StringBuffer sbuf, JsonSchema.PrintMode mode, in
 '''
 
 _tmplNonEmptyStructPPrintBody = '''
-private void pprint(int indent, StringBuffer sbuf, JsonSchema.PrintMode mode, int contentMask,
+private void pprint(int indent, StringBuffer sbuf, JsonSchema.PrintMode mode, long selectionBits,
         String key, StringBuffer errMsg) {
     if (key == null) {
         JsonSchema.bprint(sbuf, "{\\n");
@@ -1127,7 +1127,7 @@ _tmplInnerClassDef = '''
     }
 
     private static void pprintNullable(%CLASS-TYPE% val, int indent, StringBuffer sbuf, JsonSchema.PrintMode mode,
-            int contentMask, String key, StringBuffer errMsg) {
+            long selectionBits, String key, StringBuffer errMsg) {
 
         if (val == null) {
             if (key == null) {
@@ -1136,7 +1136,7 @@ _tmplInnerClassDef = '''
                 JsonSchema.bprint(errMsg, "[Error] unable to get the field " + key + " of a null JSON object");
             }
         } else {
-            val.pprint(indent, sbuf, mode, contentMask, key, errMsg);
+            val.pprint(indent, sbuf, mode, selectionBits, key, errMsg);
         }
     }
 %PPRINT-METHOD%
@@ -1202,13 +1202,13 @@ _tmplOptForOutermost = '''
         return schemaJsonStr;
     }
 
-    public void prettyPrint(StringBuffer sbuf, JsonSchema.PrintMode mode, int contentMask, String key) {
+    public void prettyPrint(StringBuffer sbuf, JsonSchema.PrintMode mode, long selectionBits, String key) {
         String resStr;
         StringBuffer resBuf, errMsg;
 
         resBuf = new StringBuffer();
         errMsg = new StringBuffer();
-        pprint(0, resBuf, mode, contentMask, key, errMsg);
+        pprint(0, resBuf, mode, selectionBits, key, errMsg);
 
         if (errMsg.length() > 0) {
             resStr = errMsg.toString();
