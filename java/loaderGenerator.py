@@ -24,7 +24,7 @@ assert set(_builtInTypeToJavaTypeMap.keys()) == builtInTypes.types, 'every built
 # ------Write Interface-----------------------------------------------------
 
 _tmplEnumDef = '''
-%OPT-PUBLIC%enum %ENUM-TYPE% {
+enum %ENUM-TYPE% {
 %ENUM-ITEMS%
 }
 '''
@@ -96,7 +96,6 @@ def _getEnumDefStrList(enumDef, forInterface):
     for name, body in enumDef.items():
         enumType = misc.getTypeName(name)
         enumDefStrList.append(_tmplEnumDef
-                                  .replace('%OPT-PUBLIC%', ("" if forInterface else "public "))
                                   .replace('%ENUM-TYPE%', enumType)
                                   .replace('%ENUM-ITEMS%', util.indent(',\n'.join(body), 1)))
     return enumDefStrList
@@ -1098,7 +1097,7 @@ def _getPPrintMethodDef(structDesc, enumDef, structDef, writeComments, isTopLeve
 # --------------------------------------------------------------------------------------------------
 
 _tmplInnerClassDef = '''
-%OPT-PUBLIC%static class %CLASS-TYPE%%OPT-IMPLEMENTS% {
+static class %CLASS-TYPE%%OPT-IMPLEMENTS% {
 %FIELD-ACCESSORS%
 %FIELD-DECLS%
 
@@ -1158,10 +1157,8 @@ _tmplInnerClassDef = '''
 
 def _getInnerClassDef(struct, enumDef, structDef, outerIntfType, genIntf):
     if genIntf:
-        optPublic = 'public '
         optImplements = ' implements ' + outerIntfType + '.' + misc.getIntfName(struct)
     else:
-        optPublic = ''
         optImplements = ''
 
     clasType = misc.getClasName(struct)
@@ -1175,7 +1172,6 @@ def _getInnerClassDef(struct, enumDef, structDef, outerIntfType, genIntf):
     setMethodDef = _getSetMethodDef(struct, structDesc, enumDef, structDef, False)
 
     return (_tmplInnerClassDef
-                .replace('%OPT-PUBLIC%', optPublic)
                 .replace('%CLASS-TYPE%', clasType)
                 .replace('%OPT-IMPLEMENTS%', optImplements)
                 .replace('%FIELD-ACCESSORS%', util.indent('\n'.join(fldAccessors), 1))
@@ -1299,7 +1295,7 @@ _tmplOptForOutermost = '''
         return rc;
     }
 
-    %OPT-PUBLIC%%CLASS-TYPE%(String jsonFilePath, boolean prettyPrint, boolean rewrite) {
+    %CLASS-TYPE%(String jsonFilePath, boolean prettyPrint, boolean rewrite) {
         this(JsonSchema.readAndParseJSON(jsonFilePath, prettyPrint));
 
         _json_file_path_ = jsonFilePath;
@@ -1385,7 +1381,7 @@ _tmplOptPrivForOutermost = '''\
 '''
 
 _tmplTopClassDef = '''
-%OPT-PUBLIC%class %CLASS-TYPE%%OPT-IMPLEMENTS% {
+class %CLASS-TYPE%%OPT-IMPLEMENTS% {
 %OPT-FOR-OUTERMOST%
 %FIELD-ACCESSORS%
 %FIELD-DECLS%
@@ -1501,11 +1497,9 @@ def writeIntf(intfFile, enumDef, structDef, schemaName):
 def getClassDef(schemaName, enumDef, structDef, arrElemTypes, genIntf, fldComments):
     enumDefStrList = []
     if genIntf:
-        optPublic = ''
         intfType = misc.getIntfName(schemaName)
         optImplements = ' implements ' + intfType + ', ConfigAccess'
     else:
-        optPublic = 'public '
         intfType = None
         optImplements = ' implements ConfigAccess'
         enumDefStrList = _getEnumDefStrList(enumDef, False)
@@ -1543,7 +1537,6 @@ def getClassDef(schemaName, enumDef, structDef, arrElemTypes, genIntf, fldCommen
 
     return (_tmplTopClassDef
                 .replace('%OPT-FOR-OUTERMOST%', optForOutermost)
-                .replace('%OPT-PUBLIC%', optPublic)
                 .replace('%CLASS-TYPE%', clasType)
                 .replace('%OPT-IMPLEMENTS%', optImplements)
                 .replace('%FIELD-ACCESSORS%', util.indent('\n'.join(fldAccessors), 1))
